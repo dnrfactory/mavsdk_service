@@ -65,21 +65,21 @@ Rectangle {
             wKey: keyItemWidth
             wValue: valueItemWidth
             textKey: "Latitude"
-            //textValue: drone.latitude
+            textValue: parseFloat(drone.latitude).toFixed(4).toString()
         }
         KeyValueBox {
             height: itemHeight
             wKey: keyItemWidth
             wValue: valueItemWidth
             textKey: "Longitude"
-            //textValue: drone.longitude
+            textValue: parseFloat(drone.longitude).toFixed(4).toString()
         }
         KeyValueBox {
             height: itemHeight
             wKey: keyItemWidth
             wValue: valueItemWidth
             textKey: "Altitude"
-            //textValue: drone.altitude
+            textValue: parseFloat(drone.altitude).toFixed(4).toString()
         }
     }
 }

@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, QObject, pyqtSlot
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtQuick import QQuickView
 # from PyQt5.QtQuick import QQuickWindow
@@ -17,20 +17,30 @@ import asyncThread
 logger = logging.getLogger()
 
 
+class WindowManager(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._windowList = list()
+        self.cleanupFunc = None
+
+    def add_window(self, window):
+        for win in self._windowList:
+            if win == window:
+                return
+        self._windowList.append(window)
+
+    @pyqtSlot()
+    def onMainWindowClosed(self):
+        for win in self._windowList:
+            win.close()
+
+        if self.cleanupFunc:
+            self.cleanupFunc()
+
+
 def _handleQmlWarnings(warnings):
     for warning in warnings:
         print("QML Warning:", warning.toString())
-
-
-def _onMainWindowClosed(sender, close_):
-    logger.debug('')
-    for rootObj in engine.rootObjects():
-        if rootObj != sender:
-            print('onMainWindowClosed 1')
-            rootObj.close()
-        else:
-            print('onMainWindowClosed 2')
-            pass
 
 
 if __name__ == "__main__":
@@ -56,5 +66,14 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     asyncThread.AsyncThread().getInstance().start()
+
+    wm = WindowManager(app)
+    wm.cleanupFunc = lambda: (
+        mainController.cleanup(),
+        asyncThread.AsyncThread().getInstance().putFinishMsg()
+    )
+
+    main_window = engine.rootObjects()[0]
+    main_window.closing.connect(wm.onMainWindowClosed)
 
     sys.exit(app.exec_())

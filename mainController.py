@@ -21,6 +21,10 @@ class MainController(QObject):
             self._qmlContext.setContextProperty(f'drone{i}', drone)
             i += 1
 
+    def cleanup(self):
+        for drone in self._drones:
+            drone.cleanup()
+
     @pyqtSlot(int, str, str)
     def connect(self, index, ip, port):
         logger.debug('')

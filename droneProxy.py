@@ -11,7 +11,9 @@ class DroneProxy(QObject):
     isConnectedChanged = pyqtSignal(bool)
     isArmedChanged = pyqtSignal(bool)
     flightModeChanged = pyqtSignal(str)
-    positionChanged = pyqtSignal(float, float, float)
+    latitudeChanged = pyqtSignal(float)
+    longitudeChanged = pyqtSignal(float)
+    altitudeChanged = pyqtSignal(float)
 
     def __init__(self, port="50051", index=0, parent=None):
         super().__init__(parent)
@@ -75,6 +77,33 @@ class DroneProxy(QObject):
         self._flightMode = val
         self.flightModeChanged.emit(val)
 
+    @pyqtProperty(float, notify=latitudeChanged)
+    def latitude(self):
+        return self._latitude
+
+    @latitude.setter
+    def latitude(self, val: float):
+        self._latitude = val
+        self.latitudeChanged.emit(val)
+
+    @pyqtProperty(float, notify=longitudeChanged)
+    def longitude(self):
+        return self._longitude
+
+    @longitude.setter
+    def longitude(self, val: float):
+        self._longitude = val
+        self.longitudeChanged.emit(val)
+
+    @pyqtProperty(float, notify=altitudeChanged)
+    def altitude(self):
+        return self._altitude
+
+    @altitude.setter
+    def altitude(self, val: float):
+        self._altitude = val
+        self.altitudeChanged.emit(val)
+
     def telemetry(self):
         return self._drone.telemetry
 
@@ -116,13 +145,6 @@ class DroneProxy(QObject):
         self._task_flight_mode = asyncio.ensure_future(self._flight_mode())
         self._task_position = asyncio.ensure_future(self._position())
 
-        # await asyncio.gather(
-        #     self._task_status_text,
-        #     self._task_armed,
-        #     self._task_flight_mode,
-        #     self._task_position
-        # )
-
     async def _print_status_text(self):
         logger.debug('')
         try:
@@ -157,7 +179,9 @@ class DroneProxy(QObject):
         try:
             async for position in self._drone.telemetry.position():
                 # self.positionChanged(position.latitude_deg, position.longitude_deg, position.relative_altitude_m)
-                await asyncio.sleep(1)
+                self.latitude = position.latitude_deg
+                self.longitude = position.longitude_deg
+                self.altitude = position.relative_altitude_m
         except asyncio.CancelledError:
             logger.debug("_position asyncio.CancelledError.")
             return

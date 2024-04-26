@@ -2,6 +2,7 @@ import logging
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 import asyncio
 import queue
+import time
 
 logger = logging.getLogger()
 
@@ -14,6 +15,7 @@ class AsyncThread(QThread):
         super().__init__()
 
         self._queue = queue.Queue()
+        self._timeStamp = time.time()
 
     @classmethod
     def getInstance(cls):
@@ -24,27 +26,35 @@ class AsyncThread(QThread):
     def put(self, item):
         self._queue.put(item)
 
+    def putFinishMsg(self):
+        logger.debug('')
+        self._queue.put('finish')
+
     async def main(self):
         while True:
-            logger.debug('.')
-            # task = self._queue.get()
-            # await asyncio.sleep(1)
+            currentTime = time.time()
+            # logger.debug(f'curr: {currentTime}')
+            # logger.debug(f'prev: {self._timeStamp}')
+            if currentTime - self._timeStamp > 3:
+                self._timeStamp = time.time()
+                logger.debug('.')
 
             try:
-                data = self._queue.get(timeout=1)
+                data = self._queue.get(block=False)
             except queue.Empty:
-                logger.debug('queue.Empty')
-                await asyncio.sleep(0.1)
+                # logger.debug('queue.Empty')
+                await asyncio.sleep(0.01)
                 continue
 
             logger.debug(f'data: {data}')
             if data is None:
                 break
+            if data == 'finish':
+                break
             method, args = data
             logger.debug(f'method: {method}')
             logger.debug(f'args: {args}')
             await method(*args)
-            logger.debug('*')
 
     def run(self):
         asyncio.run(self.main())
