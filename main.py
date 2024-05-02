@@ -1,7 +1,6 @@
 from PyQt5.QtCore import QUrl, QObject, pyqtSlot
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtQuick import QQuickView
-# from PyQt5.QtQuick import QQuickWindow
 
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtCore import Qt
@@ -13,6 +12,7 @@ from functools import partial
 
 import mainController
 import asyncThread
+import socketServer
 
 logger = logging.getLogger()
 
@@ -75,5 +75,8 @@ if __name__ == "__main__":
 
     main_window = engine.rootObjects()[0]
     main_window.closing.connect(wm.onMainWindowClosed)
+
+    socketServer.SocketServer.getInstance().start_server()
+    socketServer.SocketServer.getInstance().connect.connect(mainController.connect)
 
     sys.exit(app.exec_())

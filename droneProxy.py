@@ -2,6 +2,7 @@ from PyQt5.QtCore import QObject, pyqtSlot, pyqtProperty, pyqtSignal
 import asyncio
 import logging
 from mavsdk import System
+from socketServer import SocketServer
 
 logger = logging.getLogger()
 
@@ -133,6 +134,7 @@ class DroneProxy(QObject):
             return
 
         self.isConnected = True
+        SocketServer.getInstance().send_message("connected", (self._index, True))
 
         logger.debug("Waiting for drone to have a global position estimate...")
         async for health in self._drone.telemetry.health():
@@ -151,6 +153,7 @@ class DroneProxy(QObject):
             async for status_text in self._drone.telemetry.status_text():
                 # logger.debug(f'status text: {status_text.text}')
                 self.statusText = status_text.text
+                SocketServer.getInstance().send_message("statusText", (self._index, status_text.text))
         except asyncio.CancelledError:
             logger.debug("_print_status_text asyncio.CancelledError.")
             return
@@ -161,6 +164,7 @@ class DroneProxy(QObject):
             async for is_armed in self._drone.telemetry.armed():
                 # logger.debug(f'is_armed: {is_armed}')
                 self.isArmed = is_armed
+                SocketServer.getInstance().send_message("armed", (self._index, is_armed))
         except asyncio.CancelledError:
             logger.debug("_armed asyncio.CancelledError.")
             return
@@ -171,6 +175,7 @@ class DroneProxy(QObject):
             async for flight_mode in self._drone.telemetry.flight_mode():
                 # logger.debug(f'flight_mode: {flight_mode}')
                 self.flightMode = flight_mode.name
+                SocketServer.getInstance().send_message("flightMode", (self._index, flight_mode.name))
         except asyncio.CancelledError:
             logger.debug("_flight_mode asyncio.CancelledError.")
             return
@@ -182,6 +187,10 @@ class DroneProxy(QObject):
                 self.latitude = position.latitude_deg
                 self.longitude = position.longitude_deg
                 self.altitude = position.relative_altitude_m
+                SocketServer.getInstance().send_message("position", (self._index,
+                                                                     position.latitude_deg,
+                                                                     position.longitude_deg,
+                                                                     position.relative_altitude_m))
         except asyncio.CancelledError:
             logger.debug("_position asyncio.CancelledError.")
             return

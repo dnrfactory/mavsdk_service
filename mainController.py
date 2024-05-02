@@ -27,7 +27,7 @@ class MainController(QObject):
 
     @pyqtSlot(int, str, str)
     def connect(self, index, ip, port):
-        logger.debug('')
+        logger.debug(f'index:{index}, ip:{ip}, port:{port}')
         AsyncThread.getInstance().put((self._connect_async, (index, ip, port)))
 
     async def _connect_async(self, index, ip, port):
