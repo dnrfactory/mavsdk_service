@@ -78,5 +78,11 @@ if __name__ == "__main__":
 
     socketServer.SocketServer.getInstance().start_server()
     socketServer.SocketServer.getInstance().connect.connect(mainController.connect)
+    socketServer.SocketServer.getInstance().setLeaderDrone.connect(mainController.setLeaderDrone)
+    socketServer.SocketServer.getInstance().addFollowerDrone.connect(mainController.addFollowerDrone)
+    socketServer.SocketServer.getInstance().removeFollowerDrone.connect(mainController.removeFollowerDrone)
+    socketServer.SocketServer.getInstance().readyToFollow.connect(mainController.readyToFollow)
+    socketServer.SocketServer.getInstance().followLeader.connect(mainController.followLeader)
+    socketServer.SocketServer.getInstance().stopFollow.connect(mainController.stopFollow)
 
     sys.exit(app.exec_())

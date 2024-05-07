@@ -56,7 +56,7 @@ Rectangle {
             Connections {
                 target: drone
                 function onFlightModeChanged(flightMode) {
-                    console.log('onFlightModeChanged ' + flightMode)
+//                    console.log('onFlightModeChanged ' + flightMode)
                 }
             }
         }

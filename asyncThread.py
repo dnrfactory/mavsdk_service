@@ -37,7 +37,7 @@ class AsyncThread(QThread):
             # logger.debug(f'prev: {self._timeStamp}')
             if currentTime - self._timeStamp > 3:
                 self._timeStamp = time.time()
-                logger.debug('.')
+                # logger.debug('.')
 
             try:
                 data = self._queue.get(block=False)
@@ -54,7 +54,10 @@ class AsyncThread(QThread):
             method, args = data
             logger.debug(f'method: {method}')
             logger.debug(f'args: {args}')
+            # try:
             await method(*args)
+            # except TypeError as e:
+            #     logger.debug(f'error: {e}')
 
     def run(self):
         asyncio.run(self.main())

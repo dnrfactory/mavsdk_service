@@ -11,6 +11,12 @@ logger = logging.getLogger()
 class SocketServer(QObject):
     instance = None
     connect = pyqtSignal(int, str, str)
+    setLeaderDrone = pyqtSignal(int)
+    addFollowerDrone = pyqtSignal(int, float, float)
+    removeFollowerDrone = pyqtSignal(int)
+    readyToFollow = pyqtSignal()
+    followLeader = pyqtSignal()
+    stopFollow = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -49,6 +55,18 @@ class SocketServer(QObject):
 
         if func == "connect":
             self.connect.emit(*args)
+        elif func == "setLeaderDrone":
+            self.setLeaderDrone.emit(*args)
+        elif func == "addFollowerDrone":
+            self.addFollowerDrone.emit(*args)
+        elif func == "removeFollowerDrone":
+            self.removeFollowerDrone.emit(*args)
+        elif func == "readyToFollow":
+            self.readyToFollow.emit(*args)
+        elif func == "followLeader":
+            self.followLeader.emit(*args)
+        elif func == "stopFollow":
+            self.stopFollow.emit(*args)
 
     def send_message(self, msgType, value):
         data = {"type": msgType, "value": value}

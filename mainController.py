@@ -4,6 +4,7 @@ import asyncio
 
 from droneProxy import DroneProxy
 from asyncThread import AsyncThread
+from swarmManager import SwarmManager
 
 logger = logging.getLogger()
 
@@ -33,3 +34,33 @@ class MainController(QObject):
     async def _connect_async(self, index, ip, port):
         logger.debug('')
         await self._drones[index].connect(f"udp://{ip}:{port}")
+
+    @pyqtSlot(int)
+    def setLeaderDrone(self, index):
+        logger.debug('')
+        SwarmManager.getInstance().setLeader(self._drones[index])
+
+    @pyqtSlot(int, float, float)
+    def addFollowerDrone(self, index, distance, angle):
+        logger.debug('')
+        SwarmManager.getInstance().addFollower(self._drones[index], distance, angle)
+
+    @pyqtSlot(int)
+    def removeFollowerDrone(self, index):
+        logger.debug('')
+        SwarmManager.getInstance().removeFollower(self._drones[index])
+
+    @pyqtSlot()
+    def readyToFollow(self):
+        logger.debug('')
+        AsyncThread.getInstance().put((SwarmManager.getInstance().readyToFollow, ()))
+
+    @pyqtSlot()
+    def followLeader(self):
+        logger.debug('')
+        AsyncThread.getInstance().put((SwarmManager.getInstance().runTaskFollow, ()))
+
+    @pyqtSlot()
+    def stopFollow(self):
+        logger.debug('')
+        SwarmManager.getInstance().stopFollow()
