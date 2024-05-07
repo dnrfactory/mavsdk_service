@@ -79,3 +79,23 @@ class MainController(QObject):
     def stopOffboardMode(self, index):
         logger.debug('')
         AsyncThread.getInstance().put((self._drones[index].stop_offboard_mode, ()))
+
+    @pyqtSlot(int, float, float, float, float)
+    def setVelocityBody(self, index, forward, right, down, yaw):
+        logger.debug('')
+        AsyncThread.getInstance().put((self._drones[index].set_velocity_body, (forward, right, down, yaw)))
+
+    @pyqtSlot(int, float, float, float, float)
+    def setVelocityNED(self, index, north, east, down, yaw):
+        logger.debug('')
+        AsyncThread.getInstance().put((self._drones[index].set_velocity_ned, (north, east, down, yaw)))
+
+    @pyqtSlot(int, float, float, float, float)
+    def setAttitude(self, index, roll, pitch, yaw, thrust):
+        logger.debug('')
+        AsyncThread.getInstance().put((self._drones[index].set_attitude, (roll, pitch, yaw, thrust)))
+
+    @pyqtSlot(int, float, float, float, float)
+    def setPositionNED(self, index, north, east, down, yaw):
+        logger.debug('')
+        AsyncThread.getInstance().put((self._drones[index].set_position_ned, (north, east, down, yaw)))

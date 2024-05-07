@@ -90,6 +90,10 @@ if __name__ == "__main__":
     socketServer.SocketServer.getInstance().arm.connect(mainController.arm)
     socketServer.SocketServer.getInstance().startOffboardMode.connect(mainController.startOffboardMode)
     socketServer.SocketServer.getInstance().stopOffboardMode.connect(mainController.stopOffboardMode)
+    socketServer.SocketServer.getInstance().setVelocityBody.connect(mainController.setVelocityBody)
+    socketServer.SocketServer.getInstance().setVelocityNED.connect(mainController.setVelocityNED)
+    socketServer.SocketServer.getInstance().setAttitude.connect(mainController.setAttitude)
+    socketServer.SocketServer.getInstance().setPositionNED.connect(mainController.setPositionNED)
 
     atexit.register(exit_handler)
 

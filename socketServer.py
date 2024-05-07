@@ -20,6 +20,10 @@ class SocketServer(QObject):
     arm = pyqtSignal(int)
     startOffboardMode = pyqtSignal(int)
     stopOffboardMode = pyqtSignal(int)
+    setVelocityBody = pyqtSignal(int, float, float, float, float)
+    setVelocityNED = pyqtSignal(int, float, float, float, float)
+    setAttitude = pyqtSignal(int, float, float, float, float)
+    setPositionNED = pyqtSignal(int, float, float, float, float)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -76,6 +80,14 @@ class SocketServer(QObject):
             self.startOffboardMode.emit(*args)
         elif func == "stopOffboardMode":
             self.stopOffboardMode.emit(*args)
+        elif func == "setVelocityBody":
+            self.setVelocityBody.emit(*args)
+        elif func == "setVelocityNED":
+            self.setVelocityNED.emit(*args)
+        elif func == "setAttitude":
+            self.setAttitude.emit(*args)
+        elif func == "setPositionNED":
+            self.setPositionNED.emit(*args)
 
     def send_message(self, msgType, value):
         data = {"type": msgType, "value": value}
