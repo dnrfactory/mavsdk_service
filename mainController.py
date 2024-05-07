@@ -64,3 +64,18 @@ class MainController(QObject):
     def stopFollow(self):
         logger.debug('')
         SwarmManager.getInstance().stopFollow()
+
+    @pyqtSlot(int)
+    def arm(self, index):
+        logger.debug('')
+        AsyncThread.getInstance().put((self._drones[index].arm, ()))
+
+    @pyqtSlot(int)
+    def startOffboardMode(self, index):
+        logger.debug('')
+        AsyncThread.getInstance().put((self._drones[index].start_offboard_mode, ()))
+
+    @pyqtSlot(int)
+    def stopOffboardMode(self, index):
+        logger.debug('')
+        AsyncThread.getInstance().put((self._drones[index].stop_offboard_mode, ()))

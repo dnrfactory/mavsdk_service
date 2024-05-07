@@ -7,8 +7,7 @@ from PyQt5.QtCore import Qt
 
 import sys
 import logging
-import time
-from functools import partial
+import atexit
 
 import mainController
 import asyncThread
@@ -41,6 +40,10 @@ class WindowManager(QObject):
 def _handleQmlWarnings(warnings):
     for warning in warnings:
         print("QML Warning:", warning.toString())
+
+
+def exit_handler():
+    logger.debug('')
 
 
 if __name__ == "__main__":
@@ -84,5 +87,10 @@ if __name__ == "__main__":
     socketServer.SocketServer.getInstance().readyToFollow.connect(mainController.readyToFollow)
     socketServer.SocketServer.getInstance().followLeader.connect(mainController.followLeader)
     socketServer.SocketServer.getInstance().stopFollow.connect(mainController.stopFollow)
+    socketServer.SocketServer.getInstance().arm.connect(mainController.arm)
+    socketServer.SocketServer.getInstance().startOffboardMode.connect(mainController.startOffboardMode)
+    socketServer.SocketServer.getInstance().stopOffboardMode.connect(mainController.stopOffboardMode)
+
+    atexit.register(exit_handler)
 
     sys.exit(app.exec_())

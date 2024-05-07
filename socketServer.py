@@ -17,6 +17,9 @@ class SocketServer(QObject):
     readyToFollow = pyqtSignal()
     followLeader = pyqtSignal()
     stopFollow = pyqtSignal()
+    arm = pyqtSignal(int)
+    startOffboardMode = pyqtSignal(int)
+    stopOffboardMode = pyqtSignal(int)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -67,6 +70,12 @@ class SocketServer(QObject):
             self.followLeader.emit(*args)
         elif func == "stopFollow":
             self.stopFollow.emit(*args)
+        elif func == "arm":
+            self.arm.emit(*args)
+        elif func == "startOffboardMode":
+            self.startOffboardMode.emit(*args)
+        elif func == "stopOffboardMode":
+            self.stopOffboardMode.emit(*args)
 
     def send_message(self, msgType, value):
         data = {"type": msgType, "value": value}
