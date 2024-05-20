@@ -17,6 +17,7 @@ class SocketServer(QObject):
     readyToFollow = pyqtSignal()
     followLeader = pyqtSignal()
     stopFollow = pyqtSignal()
+    setFollowFrequency = pyqtSignal(float)
     arm = pyqtSignal(int)
     startOffboardMode = pyqtSignal(int)
     stopOffboardMode = pyqtSignal(int)
@@ -24,6 +25,7 @@ class SocketServer(QObject):
     setVelocityNED = pyqtSignal(int, float, float, float, float)
     setAttitude = pyqtSignal(int, float, float, float, float)
     setPositionNED = pyqtSignal(int, float, float, float, float)
+    closeServer = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -37,6 +39,9 @@ class SocketServer(QObject):
         if cls.instance is None:
             cls.instance = SocketServer()
         return cls.instance
+
+    def close(self):
+        self.server.close()
 
     def start_server(self):
         if not self.server.listen(QHostAddress.Any, 12345):
@@ -74,6 +79,8 @@ class SocketServer(QObject):
             self.followLeader.emit(*args)
         elif func == "stopFollow":
             self.stopFollow.emit(*args)
+        elif func == "setFollowFrequency":
+            self.setFollowFrequency.emit(*args)
         elif func == "arm":
             self.arm.emit(*args)
         elif func == "startOffboardMode":
@@ -88,6 +95,9 @@ class SocketServer(QObject):
             self.setAttitude.emit(*args)
         elif func == "setPositionNED":
             self.setPositionNED.emit(*args)
+        elif func == "closeServer":
+            self.close()
+            self.closeServer.emit(*args)
 
     def send_message(self, msgType, value):
         data = {"type": msgType, "value": value}

@@ -14,17 +14,22 @@ class SwarmManager:
     def __init__(self):
         self._leader = None
         self._followers = list()
-
         self._task_follow = None
-
-        self.follower_distance = 0.0
-        self.follower_angle = 0.0
+        self._followFrequency = 1.0
 
     @classmethod
     def getInstance(cls):
         if cls.instance is None:
             cls.instance = SwarmManager()
         return cls.instance
+
+    @property
+    def followFrequency(self):
+        return self._followFrequency
+
+    @followFrequency.setter
+    def followFrequency(self, val):
+        self._followFrequency = val
 
     def setLeader(self, leader: DroneProxy):
         logger.debug('')
@@ -65,26 +70,22 @@ class SwarmManager:
             await asyncio.sleep(0.1)
             await drone.start_offboard_mode()
 
-    async def follow(self, interval: float = 0):
-        lat = 0.0
-        lon = 0.0
-        alt = 0.0
-        yaw = 0.0
-        async for position in self._leader.telemetry().position():
-            lat = position.latitude_deg
-            lon = position.longitude_deg
-            alt = position.absolute_altitude_m
-            break
-        async for heading in self._leader.telemetry().heading():
-            yaw = heading.heading_deg
-            break
+    async def follow(self):
+        lat = self._leader.latitude
+        lon = self._leader.longitude
+        alt = self._leader.altitude_absolute
+        yaw = self._leader.heading
+
+        # logger.debug(f'lat:{lat}, lon:{lon}, alt:{alt}, yaw:{yaw}')
+
         try:
             for follower in self._followers:
                 follower_lat, follower_lon = self._calculateFollowerPosition(lat, lon, yaw,
                                                                                follower['distance'],
                                                                                follower['angle'])
+                # logger.debug(f'follower lat:{follower_lat}, lon:{follower_lon}')
                 await follower['drone'].set_position_global(follower_lat, follower_lon, alt, yaw)
-            await asyncio.sleep(interval)
+            await asyncio.sleep(self._followFrequency)
         except OffboardError as e:
             logger.debug("OffboardError:", e)
             return
@@ -98,7 +99,7 @@ class SwarmManager:
 
     async def followLeader(self):
         while True:
-            await self.follow(interval=1.0)
+            await self.follow()
 
     async def runTaskFollow(self):
         if not self._checkSwarmCondition():

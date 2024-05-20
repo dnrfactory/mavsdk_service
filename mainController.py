@@ -10,17 +10,9 @@ logger = logging.getLogger()
 
 
 class MainController(QObject):
-    def __init__(self, qmlContext, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self._qmlContext = qmlContext
-        self._qmlContext.setContextProperty('mainController', self)
-
         self._drones = [DroneProxy(), DroneProxy(port="50052", index=1), DroneProxy(port="50053", index=2), DroneProxy(port="50054", index=3)]
-
-        i = 0
-        for drone in self._drones:
-            self._qmlContext.setContextProperty(f'drone{i}', drone)
-            i += 1
 
     def cleanup(self):
         for drone in self._drones:
@@ -65,6 +57,11 @@ class MainController(QObject):
         logger.debug('')
         SwarmManager.getInstance().stopFollow()
 
+    @pyqtSlot(float)
+    def setFollowFrequency(self, frequency):
+        logger.debug('')
+        SwarmManager.getInstance().followFrequency = frequency
+
     @pyqtSlot(int)
     def arm(self, index):
         logger.debug('')
@@ -99,3 +96,9 @@ class MainController(QObject):
     def setPositionNED(self, index, north, east, down, yaw):
         logger.debug('')
         AsyncThread.getInstance().put((self._drones[index].set_position_ned, (north, east, down, yaw)))
+
+    @pyqtSlot()
+    def closeServer(self):
+        logger.debug('')
+        self.cleanup()
+        AsyncThread.getInstance().put('finish')

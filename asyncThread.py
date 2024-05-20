@@ -50,6 +50,7 @@ class AsyncThread(QThread):
             if data is None:
                 break
             if data == 'finish':
+                logger.debug('finish')
                 break
             method, args = data
             logger.debug(f'method: {method}')

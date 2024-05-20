@@ -4,6 +4,7 @@ import logging
 from mavsdk import System
 from mavsdk.offboard import (OffboardError, VelocityBodyYawspeed, VelocityNedYaw, Attitude, PositionNedYaw,
                              PositionGlobalYaw)
+from mavsdk.action import ActionError
 from socketServer import SocketServer
 
 logger = logging.getLogger()
@@ -38,6 +39,7 @@ class DroneProxy(QObject):
         self._latitude = 0.0
         self._longitude = 0.0
         self._altitude = 0.0
+        self._altitude_absolute = 0.0
         self._heading = 0.0
 
         """
@@ -146,6 +148,14 @@ class DroneProxy(QObject):
         self._altitude = val
         self.altitudeChanged.emit(val)
 
+    @property
+    def altitude_absolute(self):
+        return self._altitude_absolute
+
+    @altitude_absolute.setter
+    def altitude_absolute(self, val: float):
+        self._altitude_absolute = val
+
     @pyqtProperty(float, notify=headingChanged)
     def heading(self):
         return self._heading
@@ -176,7 +186,7 @@ class DroneProxy(QObject):
 
         logger.debug("Connecting to address:" + addr)
         try:
-            await asyncio.wait_for(self._drone.connect(system_address=addr), timeout=3.0)
+            await asyncio.wait_for(self._drone.connect(system_address=addr), timeout=10.0)
             logger.debug("Connected to drone successfully!")
 
         except asyncio.TimeoutError:
@@ -238,6 +248,7 @@ class DroneProxy(QObject):
                 self.latitude = position.latitude_deg
                 self.longitude = position.longitude_deg
                 self.altitude = position.relative_altitude_m
+                self.altitude_absolute = position.absolute_altitude_m
                 SocketServer.getInstance().send_message("position", (self._index,
                                                                      position.latitude_deg,
                                                                      position.longitude_deg,
@@ -274,7 +285,10 @@ class DroneProxy(QObject):
             self._task_heading.cancel()
 
     async def arm(self):
-        await self._drone.action.arm()
+        try:
+            await self._drone.action.arm()
+        except ActionError as error:
+            logger.debug(f"Arm failed with error: {error}")
 
     async def start_offboard_mode(self):
         try:

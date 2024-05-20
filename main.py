@@ -58,26 +58,26 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    engine = QQmlApplicationEngine()
-    engine.warnings.connect(_handleQmlWarnings)
+    # engine = QQmlApplicationEngine()
+    # engine.warnings.connect(_handleQmlWarnings)
 
-    mainController = mainController.MainController(engine.rootContext(), app)
+    mainController = mainController.MainController(app)
 
-    engine.load(QUrl.fromLocalFile("qml/Main.qml"))
-
-    if not engine.rootObjects():
-        sys.exit(-1)
+    # engine.load(QUrl.fromLocalFile("qml/Main.qml"))
+    #
+    # if not engine.rootObjects():
+    #     sys.exit(-1)
 
     asyncThread.AsyncThread().getInstance().start()
 
-    wm = WindowManager(app)
-    wm.cleanupFunc = lambda: (
-        mainController.cleanup(),
-        asyncThread.AsyncThread().getInstance().putFinishMsg()
-    )
+    # wm = WindowManager(app)
+    # wm.cleanupFunc = lambda: (
+    #     mainController.cleanup(),
+    #     asyncThread.AsyncThread().getInstance().putFinishMsg()
+    # )
 
-    main_window = engine.rootObjects()[0]
-    main_window.closing.connect(wm.onMainWindowClosed)
+    # main_window = engine.rootObjects()[0]
+    # main_window.closing.connect(wm.onMainWindowClosed)
 
     socketServer.SocketServer.getInstance().start_server()
     socketServer.SocketServer.getInstance().connect.connect(mainController.connect)
@@ -87,6 +87,7 @@ if __name__ == "__main__":
     socketServer.SocketServer.getInstance().readyToFollow.connect(mainController.readyToFollow)
     socketServer.SocketServer.getInstance().followLeader.connect(mainController.followLeader)
     socketServer.SocketServer.getInstance().stopFollow.connect(mainController.stopFollow)
+    socketServer.SocketServer.getInstance().setFollowFrequency.connect(mainController.setFollowFrequency)
     socketServer.SocketServer.getInstance().arm.connect(mainController.arm)
     socketServer.SocketServer.getInstance().startOffboardMode.connect(mainController.startOffboardMode)
     socketServer.SocketServer.getInstance().stopOffboardMode.connect(mainController.stopOffboardMode)
@@ -94,6 +95,8 @@ if __name__ == "__main__":
     socketServer.SocketServer.getInstance().setVelocityNED.connect(mainController.setVelocityNED)
     socketServer.SocketServer.getInstance().setAttitude.connect(mainController.setAttitude)
     socketServer.SocketServer.getInstance().setPositionNED.connect(mainController.setPositionNED)
+    socketServer.SocketServer.getInstance().closeServer.connect(mainController.closeServer)
+    socketServer.SocketServer.getInstance().closeServer.connect(app.quit)
 
     atexit.register(exit_handler)
 
