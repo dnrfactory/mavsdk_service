@@ -16,7 +16,7 @@ class MainController(QObject):
 
     def cleanup(self):
         for drone in self._drones:
-            drone.cleanup()
+            AsyncThread.getInstance().put((drone.cleanup, ()))
 
     @pyqtSlot(int, str, str)
     def connect(self, index, ip, port):
@@ -101,4 +101,4 @@ class MainController(QObject):
     def closeServer(self):
         logger.debug('')
         self.cleanup()
-        AsyncThread.getInstance().put('finish')
+        # AsyncThread.getInstance().put('finish')

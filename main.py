@@ -1,9 +1,5 @@
-from PyQt5.QtCore import QUrl, QObject, pyqtSlot
+from PyQt5.QtCore import QObject, pyqtSlot, QTimer
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtQuick import QQuickView
-
-from PyQt5.QtQml import QQmlApplicationEngine
-from PyQt5.QtCore import Qt
 
 import sys
 import logging
@@ -21,6 +17,7 @@ class WindowManager(QObject):
         super().__init__(parent)
         self._windowList = list()
         self.cleanupFunc = None
+        self.app = None
 
     def add_window(self, window):
         for win in self._windowList:
@@ -35,6 +32,17 @@ class WindowManager(QObject):
 
         if self.cleanupFunc:
             self.cleanupFunc()
+
+    @pyqtSlot()
+    def closeApp(self):
+        logger.debug('')
+        QTimer.singleShot(3000, self.app.quit)
+        QTimer.singleShot(3000, self.closeAsyncThread)
+
+    @pyqtSlot()
+    def closeAsyncThread(self):
+        logger.debug('')
+        asyncThread.AsyncThread.getInstance().put('finish')
 
 
 def _handleQmlWarnings(warnings):
@@ -58,26 +66,9 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    # engine = QQmlApplicationEngine()
-    # engine.warnings.connect(_handleQmlWarnings)
-
     mainController = mainController.MainController(app)
 
-    # engine.load(QUrl.fromLocalFile("qml/Main.qml"))
-    #
-    # if not engine.rootObjects():
-    #     sys.exit(-1)
-
     asyncThread.AsyncThread().getInstance().start()
-
-    # wm = WindowManager(app)
-    # wm.cleanupFunc = lambda: (
-    #     mainController.cleanup(),
-    #     asyncThread.AsyncThread().getInstance().putFinishMsg()
-    # )
-
-    # main_window = engine.rootObjects()[0]
-    # main_window.closing.connect(wm.onMainWindowClosed)
 
     socketServer.SocketServer.getInstance().start_server()
     socketServer.SocketServer.getInstance().connect.connect(mainController.connect)
@@ -96,7 +87,10 @@ if __name__ == "__main__":
     socketServer.SocketServer.getInstance().setAttitude.connect(mainController.setAttitude)
     socketServer.SocketServer.getInstance().setPositionNED.connect(mainController.setPositionNED)
     socketServer.SocketServer.getInstance().closeServer.connect(mainController.closeServer)
-    socketServer.SocketServer.getInstance().closeServer.connect(app.quit)
+
+    wm = WindowManager(app)
+    wm.app = app
+    socketServer.SocketServer.getInstance().closeServer.connect(wm.closeApp)
 
     atexit.register(exit_handler)
 

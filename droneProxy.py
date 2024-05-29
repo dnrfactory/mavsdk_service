@@ -168,9 +168,9 @@ class DroneProxy(QObject):
     def telemetry(self):
         return self._drone.telemetry
 
-    def cleanup(self):
+    async def cleanup(self):
         logger.debug("cleanup")
-        self._cancel_tasks()
+        await self._cancel_tasks()
 
         if self._drone:
             del self._drone
@@ -264,10 +264,10 @@ class DroneProxy(QObject):
                 self.heading = heading.heading_deg
                 SocketServer.getInstance().send_message("heading", (self._index, heading.heading_deg))
         except asyncio.CancelledError:
-            logger.debug("_position asyncio.CancelledError.")
+            logger.debug("_heading asyncio.CancelledError.")
             return
 
-    def _cancel_tasks(self):
+    async def _cancel_tasks(self):
         if self._task_status_text is not None:
             logger.debug("cancel status_text_task")
             self._task_status_text.cancel()
@@ -283,6 +283,8 @@ class DroneProxy(QObject):
         if self._task_heading is not None:
             logger.debug("cancel _task_heading")
             self._task_heading.cancel()
+
+        # await asyncio.wait(self._task_list)
 
     async def arm(self):
         try:
