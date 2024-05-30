@@ -47,9 +47,10 @@ class MainController(QObject):
         logger.debug('')
         AsyncThread.getInstance().put((SwarmManager.getInstance().readyToFollow, ()))
 
-    @pyqtSlot()
-    def followLeader(self):
+    @pyqtSlot(float)
+    def followLeader(self, frequency):
         logger.debug('')
+        SwarmManager.getInstance().followFrequency = frequency
         AsyncThread.getInstance().put((SwarmManager.getInstance().runTaskFollow, ()))
 
     @pyqtSlot()

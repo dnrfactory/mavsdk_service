@@ -15,7 +15,7 @@ class SocketServer(QObject):
     addFollowerDrone = pyqtSignal(int, float, float)
     removeFollowerDrone = pyqtSignal(int)
     readyToFollow = pyqtSignal()
-    followLeader = pyqtSignal()
+    followLeader = pyqtSignal(float)
     stopFollow = pyqtSignal()
     setFollowFrequency = pyqtSignal(float)
     arm = pyqtSignal(int)

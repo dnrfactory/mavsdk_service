@@ -85,7 +85,7 @@ class SwarmManager:
                                                                                follower['angle'])
                 # logger.debug(f'follower lat:{follower_lat}, lon:{follower_lon}')
                 await follower['drone'].set_position_global(follower_lat, follower_lon, alt, yaw)
-            await asyncio.sleep(self._followFrequency)
+            await asyncio.sleep(1/self._followFrequency)
         except OffboardError as e:
             logger.debug("OffboardError:", e)
             return
